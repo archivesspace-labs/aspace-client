@@ -13,7 +13,7 @@ module JSONModel
   @@models = {}
   @@custom_validations = {}
   @@strict_mode = false
-
+  @@init_args = {}
 
   def self.custom_validations
     @@custom_validations
@@ -199,7 +199,7 @@ module JSONModel
       }
 
 
-      if @@init_args[:allow_other_unmapped]
+      if @@init_args && @@init_args[:allow_other_unmapped]
         allow_unmapped_enum_value(entry[:schema]['properties'])
       end
 

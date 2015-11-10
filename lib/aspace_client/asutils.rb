@@ -60,7 +60,6 @@ module ASUtils
 
 
   def self.find_local_directories(base = nil, *plugins)
-    plugins = AppConfig[:plugins] if plugins.empty?
     base_directory = self.find_base_directory
     Array(plugins).map { |plugin| File.join(*[base_directory, "plugins", plugin, base].compact) }
   end
