@@ -1,8 +1,6 @@
-require 'java'
 require 'json'
 require 'tmpdir'
 require 'tempfile'
-require 'config/config-distribution'
 
 module ASUtils
 
@@ -44,30 +42,6 @@ module ASUtils
   end
 
 
-  # A bit funny to wrap this ourselves, but there's an interesting case when
-  # running under rspec.
-  #
-  # Rspec reseeds the random number generator at the beginning of every suite
-  # run, which means that Tempfile's "random" filenames are often IDENTICAL
-  # between subsequent Tempfile invocations across test runs.
-  #
-  # This shouldn't really matter, except when this happens:
-  #
-  #  * Test1 runs and produces tempfile "somerandomfile", which gets closed and
-  #    unlinked.
-  #
-  #  * Test2 runs and gets given "somerandomfile" too.  It starts working with it.
-  #
-  #  * Then, bam!  Garbage collection runs, and finalizes the object from Test1.
-  #    This unlinks the underlying temp file while Test2 is still using it!
-  #
-  # So yeah, not cool.  We try to inject a little randomness into "base" to
-  # avoid these sort of shenanigans, even though it really shouldn't matter in
-  # production.
-  def self.tempfile(base)
-    Tempfile.new("#{base}_#{java.lang.System.currentTimeMillis}")
-  end
-
 
   def self.to_json(obj, opts = {})
     if obj.respond_to?(:jsonize)
@@ -79,9 +53,7 @@ module ASUtils
 
 
   def self.find_base_directory(root = nil)
-    [java.lang.System.get_property("ASPACE_LAUNCHER_BASE"),
-     java.lang.System.get_property("catalina.base"),
-     File.join(*[File.dirname(__FILE__), "..", root].compact)].find {|dir|
+    [ File.join(*[File.dirname(__FILE__), "..", root].compact)].find {|dir|
       Dir.exists?(dir)
     }
   end
@@ -108,25 +80,6 @@ module ASUtils
       coll
     end
   end
-
- def self.get_diagnostics(exception = nil )
-    runtime = java.lang.Runtime.getRuntime
-   {
-      :version =>ASConstants.VERSION,  
-      :environment => java.lang.System.getenv.to_hash,
-      :jvm_properties => java.lang.System.getProperties.to_hash,
-      :globals => Hash[global_variables.map {|v| [v, eval(v.to_s)]}],
-      :appconfig => defined?(AppConfig) ? AppConfig.dump_sanitised : "not loaded",
-      :memory => {
-        :free => runtime.freeMemory,
-        :max => runtime.maxMemory,
-        :total => runtime.totalMemory
-      },
-      :cpu_count => runtime.availableProcessors,
-      :exception => exception && {:msg => exception, :backtrace => exception.backtrace}
-    }
-   
- end
 
   def self.dump_diagnostics(exception = nil)
     diagnostics = self.get_diagnostics( exception ) 

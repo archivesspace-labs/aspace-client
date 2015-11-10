@@ -1,5 +1,5 @@
-require "lib/jsonmodel"
-require "lib/memoryleak"
+require "aspace_client/jsonmodel"
+require "aspace_client/memoryleak"
 
 class ClientEnumSource
 
