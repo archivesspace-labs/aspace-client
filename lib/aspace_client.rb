@@ -10,3 +10,6 @@ require 'aspace_client/archivesspace_json_schema.rb'
 
 include JSONModel 
 
+module AspaceClient
+
+end

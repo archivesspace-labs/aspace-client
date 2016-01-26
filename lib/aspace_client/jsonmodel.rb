@@ -13,7 +13,7 @@ module JSONModel
   @@models = {}
   @@custom_validations = {}
   @@strict_mode = false
-  @@init_args = {}
+  @@init_args = {:initialized => false}
 
   def self.custom_validations
     @@custom_validations
@@ -220,8 +220,10 @@ module JSONModel
     @@init_args ||= nil
 
     # Skip initialisation if this model has already been loaded.
-    if @@init_args
+    if @@init_args[:initialized]
       return true
+    else 
+       @@init_args[:initialized] = true
     end
 
     if opts.has_key?(:strict_mode)
